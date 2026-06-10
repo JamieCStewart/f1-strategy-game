@@ -1,0 +1,14 @@
+# F1 Race Strategy Goals
+
+Project to include:
+    Initial Goal:
+        Statistical modelling of laptimes
+    Later Goals:
+        Game design
+        Front-end (React)
+        Dev-ops (Docker, Scaling)
+        Cloud Strategy
+
+Philosophy:
+    Easy to audit (for others to look at)
+    Design decisions to be documented in md files
