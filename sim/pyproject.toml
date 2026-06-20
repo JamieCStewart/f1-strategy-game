@@ -11,6 +11,17 @@ dependencies = ["numpy>=1.26"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff", "mypy"]
+model = [
+    "pandas>=2.0",
+    "pyarrow>=14",
+    "fastf1>=3.3",
+    "scipy>=1.11",
+]
+model-train = [
+    "pitwall-sim[model]",
+    "pymc>=5.0",
+    "arviz>=0.18",
+]
 
 [project.scripts]
 pitwall-race = "pitwall_sim.cli:main"

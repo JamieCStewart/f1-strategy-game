@@ -1,34 +1,55 @@
 name: CI
 
 on:
-pull_request:
-push:
-branches:
-- main
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
-quality:
-runs-on: ubuntu-latest
+  engine:
+    name: Engine (lint + type-check + tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sim
 
-```
-steps:
-  - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  - uses: actions/setup-python@v5
-    with:
-      python-version: "3.12"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-  - name: Install dependencies
-    run: |
-      python -m pip install --upgrade pip
-      pip install -e ".[dev]"
+      - name: Install
+        run: pip install -e ".[dev]"
 
-  - name: Ruff
-    run: ruff check .
+      - name: Ruff
+        run: ruff check src/ tests/
 
-  - name: MyPy
-    run: mypy .
+      - name: MyPy
+        run: mypy src/
 
-  - name: Pytest
-    run: pytest
-```
+      - name: Pytest (engine)
+        run: pytest tests/ --ignore=tests/model -v
+
+  model:
+    name: Model (ETL + features + artifact + pace-model tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sim
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install (with model deps, without PyMC)
+        run: pip install -e ".[dev,model]"
+
+      - name: Pytest (model)
+        run: pytest tests/model -v
+        # test_lap_time.py auto-skips when pymc is absent (pytest.importorskip)
