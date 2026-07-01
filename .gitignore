@@ -8,3 +8,6 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 *.swp
+node_modules/
+dist/
+web/dist/
