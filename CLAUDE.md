@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+### `sim/` — race engine
+
 All `sim/` commands must be run from `sim/` (or use `cd sim &&`). The package is managed with `uv`.
 
 ```bash
@@ -24,6 +26,43 @@ cd sim && mypy src/
 
 # Benchmark (validates Phase 0.1 exit criterion)
 cd sim && python benchmarks/bench_engine.py
+```
+
+### `api/` — FastAPI race server (Phase 0.3)
+
+```bash
+# Install (after installing sim first)
+cd sim && pip install -e .
+cd api && pip install -e .
+
+# Run dev server (port 8000)
+pitwall-server
+# or: uvicorn pitwall_api.app:app --reload --port 8000
+```
+
+### `web/` — React frontend (Phase 0.3)
+
+```bash
+cd web && npm install
+cd web && npm run dev        # dev server at http://localhost:5173 (proxies /api and /ws to port 8000)
+cd web && npm run build      # production build
+```
+
+### Full stack (local, no Docker)
+
+```bash
+# Terminal 1:
+cd api && pitwall-server
+# Terminal 2:
+cd web && npm run dev
+# Open http://localhost:5173
+```
+
+### Docker
+
+```bash
+docker compose up
+# api at :8000, web at :5173
 ```
 
 ## Architecture

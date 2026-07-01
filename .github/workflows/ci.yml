@@ -33,6 +33,69 @@ jobs:
       - name: Pytest (engine)
         run: pytest tests/ --ignore=tests/model -v
 
+  api:
+    name: API (import + smoke test)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install sim + api
+        run: |
+          pip install -e sim
+          pip install -e api
+
+      - name: Smoke test (room creation + full race loop)
+        run: |
+          python3 - <<'EOF'
+          import asyncio
+          from pitwall_api.room import build_default_room
+
+          async def test():
+              r = build_default_room("ci", tick_interval=0, seed=1)
+              msgs = []
+              async def cb(m): msgs.append(m)
+              r.subscribe(cb)
+              task = asyncio.create_task(r.run())
+              while not task.done():
+                  await asyncio.sleep(0)
+                  while r.phase == "decision_pending" and r._pending_car is not None:
+                      r.receive_decision(r._pending_car, "pit_M")
+                      await asyncio.sleep(0)
+              assert msgs[0]["type"] == "race_started"
+              assert msgs[-1]["type"] == "race_finished"
+              assert len([m for m in msgs if m["type"] == "lap_complete"]) == 57
+              print("CI smoke test passed")
+
+          asyncio.run(test())
+          EOF
+
+  web:
+    name: Web (TypeScript check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        run: npm install
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
   model:
     name: Model (ETL + features + artifact + pace-model tests)
     runs-on: ubuntu-latest

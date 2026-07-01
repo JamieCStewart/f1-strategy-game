@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from .config import RaceConfig
+from .config import Compound, RaceConfig
 from .engine import RaceResult, _pit_table, advance_one_lap
 from .pace import PaceModel, StubPaceModel
 from .state import RaceState
@@ -92,6 +92,13 @@ class LiveRace:
     @property
     def records(self) -> list[LapRecord]:
         return list(self._records)
+
+    def queue_stop(self, car_idx: int, compound: Compound) -> None:
+        """Queue a pit stop for car_idx at the end of the current (upcoming) lap.
+
+        Must be called before step(); has no effect if called after.
+        """
+        self._pit_table[self._state.lap, car_idx] = int(compound)
 
     def step(self) -> LapRecord:
         """Advance the live race by one lap and return the lap record."""
